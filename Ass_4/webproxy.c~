@@ -1,0 +1,469 @@
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <sys/socket.h>
+#include <arpa/inet.h>
+#include <netdb.h>
+#include <signal.h>
+#include <fcntl.h>
+#include <sys/time.h>
+
+// defines for connection
+#define MAX_CONNECTIONS 1000
+#define BYTES 1024
+#define MSG_SIZE 99999
+#define wsMaxSize 1000
+
+// Errors
+#define GETADDRINFOERROR 1
+#define BINDERROR        1
+#define LISTENERROR      1
+#define SLOTERROR        0
+#define PORTERROR        1
+#define WSCONFIGERROR    1
+#define SOCKETCLOSE		 0
+
+#define TRUE             1
+#define FALSE            0
+#define SUCCESS          1
+#define FAIL             0
+
+#define LINEBUFLENGTH    2000
+
+int TIMEOUT;
+char *ROOT_DIR;
+int listenfd, clients[MAX_CONNECTIONS];
+void error(char *);
+void startWebServer();
+void respond(int);
+char * checkContentType(char *);
+char PORT[10];
+struct itimerval timeout;
+
+/**************************
+Handles Time Out
+**************************/
+int globalClientNumber;
+
+/**********************************************
+The socket creation and fork operaion of main() and a part of respond() is 
+referenced from the follwing link
+Ref : http://blog.abhijeetr.com/2010/04/very-simple-http-server-writen-in-c.html
+**********************************************/
+
+int main(int argc, char* argv[])
+{
+
+    int connectionNum=0;
+    int i;
+    if (argc<2)
+    {
+    	perror("Invalid arguments");
+    }
+    strncpy(PORT, argv[1], strlen(argv[1]));
+    struct sockaddr_in clientAddr, servAddr;
+    socklen_t addrlen;
+    char c;    
+
+    //readWSconfig();     // reads the wsConfigFile
+    for (i=0; i<MAX_CONNECTIONS; i++) 
+    {
+        clients[i]=-1;
+    }
+
+    int port_num = atoi(PORT);
+    printf("port num");
+    
+    if (port_num < 1024)
+    {
+        fprintf(stderr, "The port number chosen is %d and is INVALID\n", port_num);
+        exit(PORTERROR);
+    }
+    
+    // starts the server
+    //startWebServer();
+    
+
+
+    // ACCEPT connections
+    while (1)
+    {
+        addrlen = sizeof(clientAddr);
+                printf("accepting connection before...\n");
+        // accepting the connections and forking it into a child 
+        clients[connectionNum] = accept (listenfd, (struct sockaddr *) &clientAddr, &addrlen);
+        printf("accepting connection ...\n");
+        if (clients[connectionNum]<0)
+            error ("accept() error");
+        else
+        {
+            if ( fork()==0 ) // creating child processes
+            {
+                respond(connectionNum);
+                
+            }
+        }
+
+        while (clients[connectionNum]!=-1) // supporting 1000 connections
+            {
+                connectionNum = (connectionNum+1)%MAX_CONNECTIONS;
+            }
+    }
+
+    return 0;
+}
+
+/************************************************
+starting TCP socket and binding it
+************************************************/
+void startWebServer(int port)
+{
+    struct addrinfo webServerHints, *res, *p;
+    memset (&webServerHints, 0, sizeof(webServerHints)); // Making sure the struct is empty
+    webServerHints.ai_family = AF_INET;                  // IPv4
+    webServerHints.ai_socktype = SOCK_STREAM;            // TCP stream sockets
+    webServerHints.ai_flags = AI_PASSIVE;
+
+    //sprintf(port_num_array, "%d", port);
+
+    /*int getaddrinfo(const char *node, const char *service,
+                const struct addrinfo *hints,
+                struct addrinfo **res);
+    Given node and service, which identify an Internet host and a service, 
+    getaddrinfo() returns one or more addrinfo structures, each of which contains an Internet address that can be specified in a call to bind(2) or connect(2). 
+    */
+
+    // getting address
+    if (getaddrinfo( NULL, PORT, &webServerHints, &res) != 0)
+    {
+        perror ("ERROR in getaddrinfo()");
+        exit(GETADDRINFOERROR);
+    }
+    // socket and bind
+    for (p = res; p!=NULL; p=p->ai_next)
+    {
+        if ((listenfd = socket (p->ai_family, p->ai_socktype, 0)) == -1)
+        {
+            continue;
+        }
+        if (bind(listenfd, p->ai_addr, p->ai_addrlen) == 0) break;
+    }
+
+    if (p==NULL)
+    {
+        perror ("socket() or bind() creation failed");
+        exit(BINDERROR);
+    }
+
+    freeaddrinfo(res);
+
+    // listen for incoming connections
+    if ( listen (listenfd, MAX_CONNECTIONS) != 0 )
+    {
+        perror("listen() error");
+        exit(LISTENERROR);
+    }
+
+    printf("End of socket creation\n");
+}
+
+
+
+/************************************************
+This function performs the HTTP response based 
+on the request received
+************************************************/
+int COUNT = 0;
+void respond(int n)
+{
+	int checkfor500Error = FALSE;
+    char mesgFrmClient[MSG_SIZE], *reqline[3], data_to_send[BYTES], path[MSG_SIZE];
+    int rcvd, fd, bytes_read;
+    FILE *fp;
+    char status_line[LINEBUFLENGTH];
+    char connection_status[50];
+    globalClientNumber = n;
+    int post_req_check=0;
+
+
+	printf("globalClientNumber : %d\n",globalClientNumber);
+
+
+
+			post_req_check = 0;  // make it zero before every post request
+			// zeroing the elements of the array
+		    bzero(mesgFrmClient, sizeof(mesgFrmClient));
+		    bzero(reqline, sizeof(reqline));
+		    bzero(data_to_send, sizeof(data_to_send));
+		    bzero(path, sizeof(path));
+		    bzero(status_line, sizeof(status_line));
+		    bzero(connection_status, sizeof(connection_status));
+
+		    memset( (void*)mesgFrmClient, (int)'\0', MSG_SIZE );
+		    rcvd=recv(clients[n], mesgFrmClient, MSG_SIZE, 0);
+
+// 		    // not required may be
+// 			// if (!strstr(mesgFrmClient,"Connection: Keep-alive"))    // capturing the last string from the received message
+// 			// {
+			    
+// 			//     strncpy(connection_status, "Connection: Keep-alive", strlen("Connection: Keep-alive"));
+// 			// }
+// 			// else    //If Keep-alive is not found, close the connection
+// 			// {
+// 			// 	strncpy(connection_status, "Connection: Close",strlen("Connection: Close"));
+// 			// }
+
+// 		    bzero(status_line, sizeof(status_line));
+// 		    if (rcvd<0)    // receive error
+// 		    {
+// 		        fprintf(stderr,("recv() error\n"));
+
+// 		        strncat(status_line,"HTTP/1.1",8);
+// 		        strncat(status_line," 500 Internal Server Error",strlen(" 500 Internal Server Error"));
+// 		        strncat(status_line,"\n",strlen("\n"));//strncat(status_line,"\r\n",strlen("\r\n"));
+// 		        strncat(status_line,"Content-Type:",strlen("Content-type:"));
+// 		        strncat(status_line,"NONE",strlen("NONE"));
+// 		        strncat(status_line,"\n",strlen("\n"));
+// 		        strncat(status_line,"Content-Length:",strlen("Content-Length:"));
+// 		        strncat(status_line,"NONE",strlen("NONE"));
+// 		        strncat(status_line,"\n",strlen("\n"));
+// 		        strncat(status_line,connection_status,strlen(connection_status));
+// 		        strncat(status_line,"\r\n",strlen("\r\n"));
+// 		        strncat(status_line,"\r\n",strlen("\r\n"));
+// 		        strncat(status_line,"<HEAD><TITLE>500 Internal Server Error : Receive ERROR</TITLE></HEAD>",strlen("<HEAD><TITLE>500 Internal Server Error : Receive ERROR</TITLE></HEAD>"));
+// 		        //strncat(status_line,"\r\n",strlen("\r\n"));
+// 		        strncat(status_line,"<html><BODY>>500 Internal Server Error : Receive ERROR",strlen("<BODY>>500 Internal Server Error : Receive ERROR"));
+// 		        strncat(status_line,"HTTP",strlen("HTTP"));
+// 		        strncat(status_line,"</BODY></html>",strlen("</BODY></html>"));
+// 		        // strncat(status_line,"\r\n",strlen("\r\n"));
+// 		        strncat(status_line,"\r\n",strlen("\r\n"));
+// 		        printf("%s\n",status_line);
+// 		        write(clients[n], status_line, strlen(status_line));
+
+// 		    }
+
+// 		    else if (rcvd==0)    // receive socket closed
+// 		    	rcvd = 0;
+		        
+// 		    else    // message received
+// 		    {
+		    	
+
+// 		    	//checkfor500Error = TRUE;
+//     	// creating paramters to store the incoming message from POST commmand into a file
+//     	char filename[50] = "storeMsg";
+// 	    char count_str[50];
+// 	    char line_copy[99999];
+// 	    sprintf(count_str,"%d", COUNT);
+// 	    strcat(filename, count_str);
+
+// 	    // This varaiables are used for post 
+// 	    int post_size = 0;
+//         char msgRecvPost[99999];
+//         char msg[99999];
+//         int size;
+
+
+
+//     	char check_url_validity[99999];
+
+//     	if (!strstr(mesgFrmClient,"Connection: Keep-alive"))    // capturing the last string from the received message
+// 		{
+// 	        //setitimer(ITIMER_REAL,&timeout,NULL);
+// 	        strncpy(connection_status, "Connection: Keep-alive", strlen("Connection: Keep-alive"));
+// 		}
+// 		else    /* -- If Keep-alive is not found, close the connection --- */
+// 		{
+// 			strncpy(connection_status, "Connection: Close",strlen("Connection: Close"));
+// 		}
+
+//         printf("\n## printing mesgFrmClient %s\n", mesgFrmClient);
+// }
+        // Now breaking the incoming strng into three different paths
+        // reqline[0]: GET or POST
+        // reqline[1]: URL
+        // reqline[2]: HTTP request type
+
+ //        reqline[0] = strtok (mesgFrmClient, " \t\n");
+ //        if ((strncmp(reqline[0], "GET\0", 4)==0)) // Enter if request is get 
+ //        {
+   
+
+ //            reqline[1] = strtok (NULL, " \t"); // capturing URL
+
+ //            strncpy(check_url_validity, reqline[1], strlen(reqline[1])-1);
+ //            char check_url_validity_char;
+ //            int i = 0;
+ //            int url_valid_status = TRUE;
+ //            int length = strlen(check_url_validity);
+ //            while(i < length)
+ //            {
+ //            	check_url_validity_char = check_url_validity[i];
+ //            	i++;
+ //            	// checking the validity of URL
+ //            	if ((check_url_validity_char >= 0x30) && (check_url_validity_char <= 0x39) ||\
+ //            		(check_url_validity_char >= 97) && (check_url_validity_char <= 122) || \
+ //            		(check_url_validity_char >= 65) && (check_url_validity_char <= 90) || \
+ //            		(check_url_validity_char == '-')||\
+ //            		(check_url_validity_char == '.')||\
+ //            		(check_url_validity_char == '_')||\
+ //            		(check_url_validity_char == '~')||\
+ //            		(check_url_validity_char == ':')||\
+ //            		(check_url_validity_char == '/')||\
+ //            		(check_url_validity_char == '?')||\
+ //            		(check_url_validity_char == '#')||\
+ //            		(check_url_validity_char == '[')||\
+ //            		(check_url_validity_char == ']')||\
+ //            		(check_url_validity_char == '@')||\
+ //            		(check_url_validity_char == '!')||\
+ //            		(check_url_validity_char == '$')||\
+ //            		(check_url_validity_char == '&')||\
+ //            		(check_url_validity_char == '(')||\
+ //            		(check_url_validity_char == ')')||\
+ //            		(check_url_validity_char == '*')||\
+ //            		(check_url_validity_char == '+')||\
+ //            		(check_url_validity_char == ',')||\
+ //            		(check_url_validity_char == ';')||\
+ //            		(check_url_validity_char == '=')||\
+ //            		(check_url_validity_char == '%')||\
+ //            		(check_url_validity_char == '\''))
+ //            		{
+ //            			continue;
+ //            		}
+ //            		else
+ //            		{
+ //            			printf("						Invalid URL becasue of character%c\n", check_url_validity_char);
+ //            			url_valid_status = FALSE;
+ //            			break;
+ //            		}
+
+ //           	}
+
+ //           	//////////////////////////////////////////////////////////////////////////////////////
+ //           	if (url_valid_status == FALSE) // 400 ERROR for invalid URL
+ //            {
+ //            	strncat(status_line,"HTTP/1.0",8);
+ //                strncat(status_line," 400 Bad Request",strlen(" 400 Bad Request"));
+ //                strncat(status_line,"\n",strlen("\n"));//strncat(status_line,"\r\n",strlen("\r\n"));
+ //                strncat(status_line,"Content-Type:",strlen("Content-type:"));
+ //                strncat(status_line,"NONE",strlen("NONE"));
+ //                strncat(status_line,"\n",strlen("\n"));
+ //                strncat(status_line,"Content-Length:",strlen("Content-Length:"));
+ //                strncat(status_line,"NONE",strlen("NONE"));
+ //                strncat(status_line,"\n",strlen("\n"));
+	//             strncat(status_line,connection_status,strlen(connection_status));
+ //                strncat(status_line,"\r\n",strlen("\r\n"));
+ //                strncat(status_line,"\r\n",strlen("\r\n"));
+ //                strncat(status_line,"<HEAD><TITLE>400 Bad Request Reason</TITLE></HEAD>",strlen("<HEAD><TITLE>400 Bad Request Reason</TITLE></HEAD>"));
+ //                //strncat(status_line,"\r\n",strlen("\r\n"));
+ //                strncat(status_line,"<html><BODY>>400 Bad Request Reason: Invalid URL :",strlen("<BODY>>400 Bad Request Reason: Invalid URL :"));
+ //                strncat(status_line,"HTTP",strlen("HTTP"));
+ //                strncat(status_line,"</BODY></html>",strlen("</BODY></html>"));
+ //                // strncat(status_line,"\r\n",strlen("\r\n"));
+ //                strncat(status_line,"\r\n",strlen("\r\n"));
+ //                printf("%s\n",status_line);
+ //                write(clients[n], status_line, strlen(status_line));
+ //            }
+
+ //            else {
+	// 	            reqline[2] = strtok (NULL, " \t\n");   // Capturing HTTP request
+		            
+	// 	            char http_version[8]; // storing the http request
+	// 	            if (strncmp(reqline[2], "HTTP/1.1", 8) == 0)
+	// 	                strcpy(http_version, "HTTP/1.1");
+	// 	            else
+	// 	                strcpy(http_version, "HTTP/1.0");
+
+
+	// 	            // 400 ERROR Invalid HTTP version
+	// 	            if ( strncmp( reqline[2], "HTTP/1.0", 8)!=0 && strncmp( reqline[2], "HTTP/1.1", 8)!=0 )
+	// 	            {
+	// 	                strncat(status_line,http_version,strlen(http_version));
+	// 	                strncat(status_line," 400 Bad Request",strlen(" 400 Bad Request"));
+	// 	                strncat(status_line,"\n",strlen("\n"));//strncat(status_line,"\r\n",strlen("\r\n"));
+	// 	                strncat(status_line,"Content-Type:",strlen("Content-type:"));
+	// 	                strncat(status_line,"NONE",strlen("NONE"));
+	// 	                strncat(status_line,"\n",strlen("\n"));
+	// 	                strncat(status_line,"Content-Length:",strlen("Content-Length:"));
+	// 	                strncat(status_line,"NONE",strlen("NONE"));
+	// 	                strncat(status_line,"\n",strlen("\n"));
+	// 		            strncat(status_line,connection_status,strlen(connection_status));
+	// 	                strncat(status_line,"\r\n",strlen("\r\n"));
+	// 	                strncat(status_line,"\r\n",strlen("\r\n"));
+	// 	                strncat(status_line,"<HEAD><TITLE>400 Bad Request Reason</TITLE></HEAD>",strlen("<HEAD><TITLE>400 Bad Request Reason</TITLE></HEAD>"));
+	// 	                //strncat(status_line,"\r\n",strlen("\r\n"));
+	// 	                strncat(status_line,"<html><BODY>>400 Bad Request Reason: Invalid HTTP-Version :",strlen("<BODY>>400 Bad Request Reason: Invalid HTTP-Version :"));
+	// 	                strncat(status_line,"HTTP",strlen("HTTP"));
+	// 	                strncat(status_line,"</BODY></html>",strlen("</BODY></html>"));
+	// 	                // strncat(status_line,"\r\n",strlen("\r\n"));
+	// 	                strncat(status_line,"\r\n",strlen("\r\n"));
+	// 	                printf("%s\n",status_line);
+	// 	                write(clients[n], status_line, strlen(status_line));
+	// 	            }
+
+	// 	            else
+	// 	            {
+
+	// 	            	// here you are coming into request dude
+	// 	                if ( strncmp(reqline[1], "/\0", 2)==0 )
+	// 							reqline[1] = "/index.html";        //Because if no file is specified, index.html will be opened by default (like it happens in APACHE..
+
+
+	// 							char size_array[20];
+
+	// 							printf("********************************************************************************************\n");
+	// 							strncat(status_line,http_version,strlen(http_version));
+	// 							strncat(status_line," 200 OK",strlen(" 200 OK"));
+	// 							// strncat(status_line,"\n",strlen("\n"));
+	// 							// strncat(status_line,"Content-Type:",strlen("Content-type:"));
+	// 							// //strncat(status_line,checkfileType,strlen(checkfileType));
+	// 							// strncat(status_line,"\n",strlen("\n"));
+	// 							// strncat(status_line,"Content-Length:",strlen("Content-Length:"));
+	// 							// //strncat(status_line,size_array,strlen(size_array));
+	// 							// strncat(status_line,"\n",strlen("\n"));
+	// 							// strncat(status_line,connection_status,strlen(connection_status));
+
+	// 							strncat(status_line,"\r\n",strlen("\r\n"));
+	// 							strncat(status_line,"\r\n",strlen("\r\n"));
+
+	// 							printf("printing status_line %s\n",status_line);
+	// 							send(clients[n], status_line, strlen(status_line), 0);
+
+	// 							// while ( (bytes_read=read(fd, data_to_send, BYTES))>0 )
+	// 							// write (clients[n], data_to_send, bytes_read);
+
+	// 							//fclose(fp);
+	// 							bzero(msgRecvPost,sizeof(msgRecvPost));
+	// 							bzero(msg,sizeof(msg));
+	// 	            //}
+		                
+	// 	            }
+	// 	        }
+					        
+	// 	    //////////////////////////////////////////////////////////////////////////////////////    
+	// 	            // from here
+ //        }
+
+	// }
+
+	// if (!strstr(mesgFrmClient,"Connection: Keep-alive"))    // capturing the last string from the received message
+	// {
+	//     setitimer(ITIMER_REAL,&timeout,NULL);
+	//     //strncpy(connection_status, "Connection: Keep-alive", strlen("Connection: Keep-alive"));
+	// }
+	//else    /* -- If Keep-alive is not found, close the connection --- */
+	//{
+		//strncpy(connection_status, "Connection: Close",strlen("Connection: Close"));
+		//
+		//break;
+	    shutdown (clients[n], SHUT_RDWR);         //All further send and recieve operations are DISABLED...
+    	close(clients[n]);
+    	clients[n]=-1;
+    	exit(0); // close the sockets
+	//}
+
+
+}

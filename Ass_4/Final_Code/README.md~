@@ -1,0 +1,77 @@
+pages_from_server - PASS 
+pages_from_proxy  - PASS 
+pages_from_server_after_cache_timeout - PASS  
+prefetching       - PASS  
+multithreading  - PASS for multiple clients and hosts 
+connection keepalive -  PARTIAL sending keepalive but prefetching gets disturbed on using timeout
+
+
+Videos for Demo
+________________
+
+
+1) 
+https://www.youtube.com/watch?v=McoKePXiyHc&feature=youtu.be
+
+
+To run proxy server 
+./webproxy <PORT Number> <Cache timeout>
+
+./webproxy 10001 100
+
+
+Testing Instructions 
+Clear the Mozilla cache and local proxy server cache 
+
+
+For Testing with http browser (Mozilla Firefox)
+1)http://www.umich.edu/~chemh215/W09HTML/SSG4/ssg6/html/Website/DREAMWEAVERPGS/first.html
+2)www.google.com 
+
+For Testing with telnet
+telnet 127.0.0.1 10001
+GET http://www.google.com HTTP/1.0
+
+
+Implemntation of Code
+
+
+1) Proxy Implementation - 
+
+ The webproxy parses the request from client.
+ Checks if present in cache
+ If exists displays
+
+       CACHE MEMORY FOUND and popilates information from caache to client
+ else
+
+       displays NO CACHE FOUND and passes the appropriate request to server
+
+ Sends the requested information back to client and parallely stores it on cache memory
+
+
+
+2) Caching and Timeout implementation 
+
+For caching and searching file , MD5 hashing is been used
+
+
+current time + file modified time  < timeout - file is fetched from cache 
+
+else
+	File fetched from Proxy Server (and replaces the old file if present)
+
+
+3) Prefetching Implementation 
+
+The links present in the file from server are extracted and passed onto server
+
+server responds appropriately with the request and is stored in the cache 
+
+
+
+4) PORT implementation 
+
+The URL is always checked for a port number and if not found default hit on port 80 both from browser and telnet 
+
+

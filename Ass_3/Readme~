@@ -1,0 +1,58 @@
+
+This folder contains:
+
+1. dfc.c - This file acts as Client Program
+2. dfs.c - This file acts as Server Program
+3. Makefile   - This file creates two executable file client (from udp-send.c) and server (from udp-recv.c)
+4. dfc.conf - Configuration file for client
+5. dfs.conf - Configuration file for server
+
+Start the Server
+
+1. Open Terminal. 
+2. Navigate to the curent directory
+
+Run the command: ./dfs [portnum] [Configfile]
+
+
+The server runs forever, using TCP Protocol.
+
+
+Start the Client
+
+1. Open Terminal. 
+2. Navigate to the curent directory
+
+Run the command: ./dfs [Configfile] 
+
+/******************************************************************************/
+The client supports the following functions:
+
+Available commands:
+1. gets:
+	Enter the filename and subfolder when prompted [NOTE: For empty subfolder enter /]
+	1. Gets the file parts from distributed servers
+	2. Default: get from folder with username
+	3. Subfolder: gets files from given subfolder
+	Returns: ERROR message if files doesn't exist
+	
+
+2. puts:
+	Enter the filename and subfolder when prompted
+	1. puts files onto distributed servers with redundancy
+	2. Default: puts in folder with username
+	3. Subfolder: creates if the folder doesn't exict puts files into given subfolder
+
+3. ls:
+	This command lists all the available files on the server.
+	1. By default lists files from the folder with username
+	2. If subfolder is given then lists files from the given subfolder
+
+
+Supports timeout of 1 second
+Extra Credits:
+	Optimized get 
+	Encryption/Decryption done using AES algorithm
+	Implemented subfolder on DFS
+
+

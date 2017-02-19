@@ -1,0 +1,390 @@
+HTTP/1.1 200 OK
+Date: Sat, 10 Dec 2016 23:56:06 GMT
+Server: Apache
+Accept-Ranges: bytes
+Content-Length: 11343
+Connection: close
+Content-Type: text/html; charset=utf-8
+
+
+
+
+
+<title>My First Homepage</title>
+
+
+<style type="text/css">
+<!--
+body {
+	background-color: #00FFCC;
+}
+-->
+</style>
+<script type="text/javascript">
+<!--
+function MM_swapImgRestore() { //v3.0
+  var i,x,a=document.MM_sr; for(i=0;a&&i<a.length&&(x=a[i])&&x.oSrc;i++) x.src=x.oSrc;
+}
+function MM_preloadImages() { //v3.0
+  var d=document; if(d.images){ if(!d.MM_p) d.MM_p=new Array();
+    var i,j=d.MM_p.length,a=MM_preloadImages.arguments; for(i=0; i<a.length; i++)
+    if (a[i].indexOf("#")!=0){ d.MM_p[j]=new Image; d.MM_p[j++].src=a[i];}}
+}
+
+function MM_findObj(n, d) { //v4.01
+  var p,i,x;  if(!d) d=document; if((p=n.indexOf("?"))>0&&parent.frames.length) {
+    d=parent.frames[n.substring(p+1)].document; n=n.substring(0,p);}
+  if(!(x=d[n])&&d.all) x=d.all[n]; for (i=0;!x&&i<d.forms.length;i++) x=d.forms[i][n];
+  for(i=0;!x&&d.layers&&i<d.layers.length;i++) x=MM_findObj(n,d.layers[i].document);
+  if(!x && d.getElementById) x=d.getElementById(n); return x;
+}
+
+function MM_swapImage() { //v3.0
+  var i,j=0,x,a=MM_swapImage.arguments; document.MM_sr=new Array; for(i=0;i<(a.length-2);i+=3)
+   if ((x=MM_findObj(a[i]))!=null){document.MM_sr[j++]=x; if(!x.oSrc) x.oSrc=x.src; x.src=a[i+2];}
+}
+//-->
+</script>
+<body onLoad="MM_preloadImages('http://i240.photobucket.com/albums/ff35/daniellelaurenxo/789.jpg')"><
+
+
+
+<style>
+.jc{
+position:relative;
+}
+</style>
+
+<script language="JavaScript1.2">
+
+//Trembling message script- © Dynamic Drive (www.dynamicdrive.com)
+//For full source code, 100's more DHTML scripts, and TOS,
+//visit http://www.dynamicdrive.com
+
+var ns6=document.getElementById&&!document.all
+var ie=document.all
+
+var customcollect=new Array()
+var i=0
+
+function jiggleit(num){
+if ((!document.all&&!document.getElementById)) return;
+customcollect[num].style.left=(parseInt(customcollect[num].style.left)==-1)? customcollect[num].style.left=1 : customcollect[num].style.left=-1
+}
+
+function init(){
+if (ie){
+while (eval("document.all.jiggle"+i)!=null){
+customcollect[i]= eval("document.all.jiggle"+i)
+i++
+} 
+}
+else if (ns6){
+while (document.getElementById("jiggle"+i)!=null){
+customcollect[i]= document.getElementById("jiggle"+i)
+i++
+}
+}
+
+if (customcollect.length==1)
+setInterval("jiggleit(0)",80)
+else if (customcollect.length>1)
+for (y=0;y<customcollect.length;y++){
+var tempvariable='setInterval("jiggleit('+y+')",'+'100)'
+eval(tempvariable)
+}
+}
+
+window.onload=init
+
+</script>
+
+
+
+<a href="#" onMouseOut="MM_swapImgRestore()" onMouseOver="MM_swapImage('Image6','','http://i240.photobucket.com/albums/ff35/daniellelaurenxo/789.jpg',1)"><img src="http://i240.photobucket.com/albums/ff35/daniellelaurenxo/Dysfunctionalgroups.jpg" name="Image6" width="545" height="473" border="0"><br></a><font color="#CC0099" size="+5" face="Courier New, Courier, monospace">My Chemistry Page</font><br>
+<br>
+
+<br>
+<font color="#0033FF" size="3" face="Georgia, Times New Roman, Times, serif">My Chemistry 215 Professor 
+<br><a href="http://s240.photobucket.com/albums/ff35/daniellelaurenxo/?action=view&current=melaniesanford.jpg" target="_blank"><img src="http://i240.photobucket.com/albums/ff35/daniellelaurenxo/sanford1.jpg" border="0" alt="Photobucket"></a>
+<br>Dr. Melanie S. Sanford Ph.D.</font>
+
+<br><br>My SSG Leader<br>
+<a href="http://s240.photobucket.com/albums/ff35/daniellelaurenxo/?action=view&current=tracy1.jpg" target="_blank"><img src="http://i240.photobucket.com/albums/ff35/daniellelaurenxo/tracy1.jpg" border="0" alt="Photobucket"></a>
+<br>
+<br>Tracy Lent
+
+<br>
+
+
+<!-- Start bouncing image  -->
+<div id="img" style="position:absolute;">
+<img src="http://i240.photobucket.com/albums/ff35/daniellelaurenxo/bouncing_image.gif" onMouseDown="pauseResume();">
+</div>
+<SCRIPT LANGUAGE="JavaScript">
+// By Justin Arruda (JArruda@mindspring.com)
+// Courtesy of SimplytheBest.net - http://simplythebest.net/scripts/
+<!-- Begin
+var step = 5;
+var delay = 20;
+var height = 0;
+var Hoffset = 0;
+var Woffset = 0;
+var yon = 0;
+var xon = 0;
+var pause = true;
+var interval;
+var name = navigator.appName;
+if(name == "Microsoft Internet Explorer") name = true;
+else name = false;
+var xPos = 20;
+if(name) var yPos = document.body.clientHeight;
+else var yPos = window.innerHeight;
+function changePos() {
+if(name) {
+width = document.body.clientWidth;
+height = document.body.clientHeight;
+Hoffset = img.offsetHeight;
+Woffset = img.offsetWidth;
+img.style.left = xPos + document.body.scrollLeft;
+img.style.top = yPos + document.body.scrollTop;
+}
+else {
+height = window.innerHeight;
+width = window.innerWidth;
+Hoffset = document.img.clip.height;
+Woffset = document.img.clip.width;
+document.img.pageY = yPos + window.pageYOffset;
+document.img.pageX = xPos + window.pageXOffset;
+}
+if (yon) {
+yPos = yPos + step;
+}
+else {
+yPos = yPos - step;
+}
+if (yPos < 0) {
+yon = 1;
+yPos = 0;
+}
+if (yPos >= (height - Hoffset)) {
+yon = 0;
+yPos = (height - Hoffset);
+
+}
+if (xon) {
+xPos = xPos + step;
+}
+else {
+xPos = xPos - step;
+}
+if (xPos < 0) {
+xon = 1;
+xPos = 0;
+}
+if (xPos >= (width - Woffset)) {
+xon = 0;
+xPos = (width - Woffset);
+   }
+}
+function start() {
+if(name) img.visibility = "visible";
+else document.img.visibility = "visible";
+interval = setInterval('changePos()',delay);
+}
+function pauseResume() {
+if(pause) {
+clearInterval(interval);
+pause = false;
+}
+else {
+interval = setInterval('changePos()',delay);
+pause = true;
+   }
+}
+start();
+//  End -->
+</script>
+<!-- End bouncing image  -->
+
+
+
+
+
+
+
+
+<br><br><br><font color="#3333FF" size="4">Chemistry Wonderland</font>
+
+<br><br>Gases explode, are you listenin'
+   <br>In your rest tube, silver glistens
+<br>A beautiful sight, we're happy tonight
+  <br> Walking in a chemistry wonderland.
+
+<br><br>Gone away, is the buoyancy
+  <br> Here to stay, is the density
+<br>A beautiful sight, we're happy tonight
+  <br> Walking in a chemistry wonderland.
+
+<br>In the beaker we will make lead carbonate
+  <br> and decide if what's left is nitrate
+<br>My partner asks "Do we measure it in moles or grams?"
+   <br>and I'll say, "Does it matter in the end?"
+
+<br><br>Later on, as we calculate
+   <br>the amount, of our nitrate
+<br>We'll face unafraid, the precipitates that we made
+   <br>walking in a chemistry wonderland.
+   
+   <br>Poem from: <a href="http://www.xs4all.nl/~jcdverha/scijokes/3_1.html">Chemistry Poetry</a>
+   
+<br><br><table width="200" border="1">
+  <tr>
+    <td>Kevin Anderson</td>
+    <td><a href="http://www-personal.umich.edu/~kevinand/first.html">kevinand</a></td>
+  </tr>
+  <tr>
+    <td>Zesheng Chen</td>
+    <td><a href="http://www-personal.umich.edu/~zechen/first.html">zechen</a></td>
+  </tr>
+  <tr>
+    <td>Stephen Glotzhober</td>
+    <td><a href="http://www-personal.umich.edu/~sglotz/first.html">sglotz</a></td>
+  </tr>
+  <tr>
+    <td>Angela Guo</td>
+    <td><a href="http://www-personal.umich.edu/~aguo/first.html">aguo</a></td>
+  </tr>
+  <tr>
+    <td>Kristopher Gutowski</td>
+    <td><a href="http://www-personal.umich.edu/~kgutow/first.html">kgutow</a></td>
+  </tr>
+  <tr>
+    <td>James Hernandez</td>
+    <td><a href="http://www-personal.umich.edu/~jhernan/first.html">jhernan</a></td>
+  </tr>
+  <tr>
+    <td>Nikhil Iyer</td>
+    <td><a href="http://www-personal.umich.edu/~nri/first.html">nri</a></td>
+  </tr>
+  <tr>
+    <td>Amy Li</td>
+    <td><a href="http://www-personal.umich.edu/~ayli/first.html">ayli</a></td>
+  </tr>
+  <tr>
+    <td>Vikram Linga</td>
+    <td><a href="http://www-personal.umich.edu/~viklinga/first.html">viklinga</a></td>
+  </tr>
+  <tr>
+    <td>Sabrina Na</td>
+    <td><a href="http://www-personal.umich.edu/~sabridna/first.html">sabridna</a></td>
+  </tr>
+  <tr>
+    <td>Vishrut Srivastava</td>
+    <td><a href="http://www-personal.umich.edu/~vishrut/first.html">vishrut</a></td>
+  </tr>
+</table>
+
+
+
+<br><br><br><br><br><a href="mailto:dulongd@umich.edu">contact me.</a>
+<br><a href="http://www-personal.umich.edu/~sglotz/first.html">next page. </a>
+<br><br><br><img src="http://counter.www.umich.edu/counter?link=http://www-personal.umich.edu/~dulongd/first.html">
+
+
+
+
+
+
+<script language="JavaScript1.2">
+// Snow Effect Script, Copyright 1999 Altan d.o.o. (snow@altan.hr, http://www.altan.hr/snow/index.html)*/
+// Courtesy of SimplytheBest.net - http://simplythebest.net/scripts/
+  var no = 10;
+
+  var ns4up = (document.layers) ? 1 : 0;  // browser sniffer
+  var ie4up = (document.all) ? 1 : 0;
+
+  var dx, xp, yp;    // coordinate and position variables
+  var am, stx, sty;  // amplitude and step variables
+  var i, doc_width = 800, doc_height = 600;
+  
+  if (ns4up) {
+    doc_width = self.innerWidth;
+    doc_height = self.innerHeight;
+  } else if (ie4up) {
+    doc_width = document.body.clientWidth;
+    doc_height = document.body.clientHeight;
+  }
+
+  dx = new Array();
+  xp = new Array();
+  yp = new Array();
+  am = new Array();
+  stx = new Array();
+  sty = new Array();
+  
+  for (i = 0; i < no; ++ i) {  
+    dx[i] = 0;                        // set coordinate variables
+    xp[i] = Math.random()*(doc_width-50);  // set position variables
+    yp[i] = Math.random()*doc_height;
+    am[i] = Math.random()*20;         // set amplitude variables
+    stx[i] = 0.02 + Math.random()/10; // set step variables
+    sty[i] = 0.7 + Math.random();     // set step variables
+    if (ns4up) {                      // set layers
+      if (i == 0) {
+        document.write("<layer name=\"dot"+ i +"\" left=\"15\" top=\"15\" visibility=\"show\"><a href=\"http://inet.hr/\"><img src=\"images/dot.gif\" border=\"0\"></a></layer>");
+      } else {
+        document.write("<layer name=\"dot"+ i +"\" left=\"15\" top=\"15\" visibility=\"show\"><img src=\"images/dot.gif\" border=\"0\"></layer>");
+      }
+    } else if (ie4up) {
+      if (i == 0) {
+        document.write("<div id=\"dot"+ i +"\" style=\"POSITION: absolute; Z-INDEX: "+ i +"; VISIBILITY: visible; TOP: 15px; LEFT: 15px;\"><a href=\"http://inet.hr/\"><img src=\"images/dot.gif\" border=\"0\"></a></div>");
+      } else {
+        document.write("<div id=\"dot"+ i +"\" style=\"POSITION: absolute; Z-INDEX: "+ i +"; VISIBILITY: visible; TOP: 15px; LEFT: 15px;\"><img src=\"images/dot.gif\" border=\"0\"></div>");
+      }
+    }
+  }
+  
+  function snowNS() {  // Netscape main animation function
+    for (i = 0; i < no; ++ i) {  // iterate for every dot
+      yp[i] += sty[i];
+      if (yp[i] > doc_height-50) {
+        xp[i] = Math.random()*(doc_width-am[i]-30);
+        yp[i] = 0;
+        stx[i] = 0.02 + Math.random()/10;
+        sty[i] = 0.7 + Math.random();
+        doc_width = self.innerWidth;
+        doc_height = self.innerHeight;
+      }
+      dx[i] += stx[i];
+      document.layers["dot"+i].top = yp[i];
+      document.layers["dot"+i].left = xp[i] + am[i]*Math.sin(dx[i]);
+    }
+    setTimeout("snowNS()", 10);
+  }
+
+  function snowIE() {  // IE main animation function
+    for (i = 0; i < no; ++ i) {  // iterate for every dot
+      yp[i] += sty[i];
+      if (yp[i] > doc_height-50) {
+        xp[i] = Math.random()*(doc_width-am[i]-30);
+        yp[i] = 0;
+        stx[i] = 0.02 + Math.random()/10;
+        sty[i] = 0.7 + Math.random();
+        doc_width = document.body.clientWidth;
+        doc_height = document.body.clientHeight;
+      }
+      dx[i] += stx[i];
+      document.all["dot"+i].style.pixelTop = yp[i];
+      document.all["dot"+i].style.pixelLeft = xp[i] + am[i]*Math.sin(dx[i]);
+    }
+    setTimeout("snowIE()", 10);
+  }
+
+  if (ns4up) {
+    snowNS();
+
+  } else if (ie4up) {
+    snowIE();
+  }
+</script>
